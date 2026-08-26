@@ -1,0 +1,16 @@
+.env
+.DS_Store
+tri-run.log
+tri-run.done
+tri-config-path.txt
+tri-config.json
+.tri-config-resolved.json
+smoke.json
+Result/
+
+# Image / design files
+*.psd
+*.png
+*.jpg
+*.jpeg
+_backup-truoc-khi-gop/
