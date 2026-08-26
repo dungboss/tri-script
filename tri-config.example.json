@@ -1,0 +1,55 @@
+{
+  "source": "fr_name.csv",
+  "sourceLabel": "Pháp",
+  "templateFolder": "PTS",
+  "outputFolder": "Result",
+  "outputFormula": "[[name]][name]-xxx-[stt]",
+  "limit": 0,
+  "rules": [
+    {
+      "min": 3,
+      "max": 3,
+      "template": "LY0326002_3.psd"
+    },
+    {
+      "min": 4,
+      "max": 4,
+      "template": "LY0326002_4.psd"
+    },
+    {
+      "min": 5,
+      "max": 5,
+      "template": "LY0326002_5.psd"
+    },
+    {
+      "min": 6,
+      "max": 6,
+      "template": "LY0326002_6.psd"
+    },
+    {
+      "min": 7,
+      "max": 7,
+      "template": "LY0326002_7.psd"
+    },
+    {
+      "min": 8,
+      "max": 8,
+      "template": "LY0326002_8.psd"
+    },
+    {
+      "min": 9,
+      "max": 9,
+      "template": "LY0326002_9.psd"
+    },
+    {
+      "min": 10,
+      "max": 10,
+      "template": "LY0326002_10.psd"
+    },
+    {
+      "min": 11,
+      "max": 11,
+      "template": "LY0326002_11.psd"
+    }
+  ]
+}
