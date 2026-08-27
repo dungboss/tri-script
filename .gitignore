@@ -14,3 +14,6 @@ Result/
 *.jpg
 *.jpeg
 _backup-truoc-khi-gop/
+
+# backups
+*.bak-*
