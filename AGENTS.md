@@ -142,6 +142,10 @@ dùng vào *System Settings → Privacy & Security → Automation*.
 
 ### NAS (nếu template nằm trên NAS)
 
+> **Ưu tiên chạy local**: nếu template nằm trên NAS, tải PSD về `local-run/tri/PTS/` trước,
+> ghi config trỏ local, chạy, rồi upload kết quả lên NAS — đừng để Photoshop đọc/ghi trực
+> tiếp qua WebDAV (rất chậm).
+
 Credentials trong `.env` (copy từ `.env.example`, **không commit**).
 
 ```bash
