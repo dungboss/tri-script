@@ -125,6 +125,7 @@ function main() {
 
   var skippedCount = 0;
   var exported = 0;
+  var existingCount = 0;
   for (var recordIndex = 0; recordIndex < records.length; recordIndex++) {
     var record = records[recordIndex];
     var template = getTemplateForName(record.sourceName, selection.rules);
@@ -133,8 +134,15 @@ function main() {
       continue;
     }
     var outputName = applyOutputNameFormula(selection.outputFormula, record);
+    var outputFile = new File(outputFolder.fsName + "/" + buildOutputFileName(outputName));
+    if (outputFile.exists) {
+      existingCount++;
+      log("PROGRESS " + (exported + existingCount) + "/" + records.length);
+      continue;
+    }
     processName(record.sourceName, outputName, template);
     exported++;
+    log("PROGRESS " + (exported + existingCount) + "/" + records.length);
   }
   closeOpenTemplate();
 

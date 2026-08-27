@@ -10,6 +10,12 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 JSX="$SCRIPT_DIR/tri-script.jsx"
+
+# Nếu có cờ huỷ (do /cancel trên Telegram), thoát ngay — tránh agent retry khởi động lại Photoshop.
+if [[ -f "$SCRIPT_DIR/../.cancel-flag" ]]; then
+  echo "Có lệnh huỷ trước đó — bỏ qua lần chạy này."
+  exit 0
+fi
 CONFIG="${1:-$SCRIPT_DIR/tri-config.json}"
 LOG="$SCRIPT_DIR/tri-run.log"
 DONE="$SCRIPT_DIR/tri-run.done"
@@ -66,15 +72,47 @@ echo "Config:    $CONFIG"
 # TRI_CONFIG chỉ là dự phòng khi Photoshop được khởi động mới từ chính shell này.
 export TRI_CONFIG="$CONFIG"
 
-rm -f "$DONE"
+MAX_RETRIES="${TRI_MAX_RETRIES:-2}"
+attempt=0
+while :; do
+  if [[ -f "$SCRIPT_DIR/../.cancel-flag" ]]; then
+    echo "Có lệnh huỷ — dừng." >&2
+    exit 130
+  fi
+  rm -f "$DONE"
+  set +e
+  ERR="$(osascript \
+    -e "with timeout of ${TRI_OSA_TIMEOUT:-21600} seconds" \
+    -e "tell application \"$PS_APP\" to activate" \
+    -e "tell application \"$PS_APP\" to do javascript (file (POSIX file \"$JSX\" as text)) with arguments {\"$CONFIG\"}" \
+    -e "end timeout" \
+    2>&1 >/dev/null)"
+  STATUS=$?
+  set -e
+  if [[ $STATUS -eq 0 ]]; then break; fi
+  if [[ "$ERR" == *"-1743"* || "$ERR" == *"Not authorized"* ]]; then break; fi
+  attempt=$((attempt+1))
+  if [[ $attempt -gt $MAX_RETRIES ]]; then break; fi
+  echo "Photoshop bị lỗi/tắt giữa chừng (lần $attempt/$MAX_RETRIES). Tự chạy lại sau 5s..." >&2
+  sleep 5
+done
 
-set +e
-ERR="$(osascript \
-  -e "tell application \"$PS_APP\" to activate" \
-  -e "tell application \"$PS_APP\" to do javascript (file (POSIX file \"$JSX\" as text)) with arguments {\"$CONFIG\"}" \
-  2>&1 >/dev/null)"
-STATUS=$?
-set -e
+# --- Dọn file tạm (.sb-*, ._*) sinh ra khi Photoshop ghi output (thường qua NAS) ---
+cleanup_temp() {
+  local out
+  out="$(python3 -c 'import json,sys
+try:
+    cfg=json.load(open(sys.argv[1], encoding="utf-8"))
+    v=cfg.get("outputFolder","")
+    print(v if isinstance(v,str) else "")
+except Exception:
+    pass' "$CONFIG" 2>/dev/null)"
+  [[ -n "$out" ]] || return 0
+  [[ "$out" = /* ]] || out="$SCRIPT_DIR/$out"
+  [[ -d "$out" ]] || return 0
+  find "$out" -maxdepth 1 \( -name '._*' -o -name '*.sb-*' \) -delete 2>/dev/null || true
+}
+cleanup_temp
 
 if [[ $STATUS -ne 0 ]]; then
   echo "Lỗi khi gọi Photoshop:" >&2
