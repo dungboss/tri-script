@@ -17,3 +17,6 @@ _backup-truoc-khi-gop/
 
 # backups
 *.bak-*
+
+# fast-path runtime config (tạo tự động mỗi lần chạy fast-path)
+.fastpath-tri-config.json

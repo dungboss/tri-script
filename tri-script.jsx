@@ -1326,24 +1326,29 @@ function processName(sourceName, outputName, template) {
   );
 }
 
-// Focus name layer → enter text edit mode → paste new content (mirrors manual double-click + paste)
+// Đổi nội dung text layer. Chỉ xử lý ArtLayer dạng TEXT — bỏ qua group/smart object/
+// layer đã rasterize (template vic41 có LayerSet tên "name" gây lỗi "Select not available").
+// Không dùng hành động "slct" (enter text edit mode) vì nó fragile và không cần thiết:
+// gán textItem.contents trực tiếp vẫn thay text và giữ nguyên định dạng layer.
 function changeLayerContent(nameLayer, sourceName) {
   if (!nameLayer) {
     return;
   }
 
-  // Step 1: focus layer (equivalent to clicking the layer in Layers panel)
-  app.activeDocument.activeLayer = nameLayer;
+  if (nameLayer.typename !== "ArtLayer" || nameLayer.kind !== LayerKind.TEXT) {
+    log("⚠ Bỏ qua layer '" + nameLayer.name + "' (typename=" + nameLayer.typename + ") — không phải text layer.");
+    return;
+  }
 
-  // Step 2: enter text edit mode (equivalent to double-clicking the layer)
-  var selectDesc = new ActionDescriptor();
-  var selectRef = new ActionReference();
-  selectRef.putEnumerated(charIDToTypeID("TxLr"), charIDToTypeID("Ordn"), charIDToTypeID("Trgt"));
-  selectDesc.putReference(charIDToTypeID("null"), selectRef);
-  executeAction(charIDToTypeID("slct"), selectDesc, DialogModes.NO);
+  try {
+    app.activeDocument.activeLayer = nameLayer;
+  } catch (e) {}
 
-  // Step 3: paste new content — replaces all text, preserves layer formatting
-  nameLayer.textItem.contents = trimString(String(sourceName));
+  try {
+    nameLayer.textItem.contents = trimString(String(sourceName));
+  } catch (e) {
+    log("⚠ Không đổi được text layer '" + nameLayer.name + "': " + e);
+  }
 }
 
 // Thay token [name] / [stt] / [content] trong công thức bằng giá trị của dòng.
