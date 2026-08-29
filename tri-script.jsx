@@ -1079,16 +1079,28 @@ function findTemplateIndexByName(templateFiles, templateName) {
   return -1;
 }
 
-// Dò template theo số ở cuối tên file (bỏ phần mở rộng): "LY0326002_7", "tri18 7", "7" → độ dài 7
+// Dò template theo số ở cuối tên file (bỏ phần mở rộng):
+// "LY0326002_7", "tri18 7", "7" → độ dài 7; "5-6" → độ dài 5..6.
 function findTemplateIndexByLength(templateFiles, length) {
   if (!templateFiles || !length) {
     return -1;
   }
 
+  // Ưu tiên file chỉ định đúng một độ dài, nếu có; ví dụ 6.psd ưu tiên hơn 5-6.psd.
   for (var i = 0; i < templateFiles.length; i++) {
-    var trailingNumber = normalizeTemplateName(templateFiles[i].name).match(/(\d+)\s*$/);
-    if (trailingNumber && parseInt(trailingNumber[1], 10) === length) {
+    var stem = normalizeTemplateName(templateFiles[i].name);
+    var singleNumber = stem.match(/(\d+)\s*$/);
+    var rangeNumber = stem.match(/(\d+)\s*-\s*(\d+)\s*$/);
+    if (singleNumber && !rangeNumber && parseInt(singleNumber[1], 10) === length) {
       return i;
+    }
+  }
+
+  // Không có file exact thì dùng file range chứa độ dài cần tìm: 5-6.psd → 5 và 6.
+  for (var j = 0; j < templateFiles.length; j++) {
+    var range = normalizeTemplateName(templateFiles[j].name).match(/(\d+)\s*-\s*(\d+)\s*$/);
+    if (range && parseInt(range[1], 10) <= length && length <= parseInt(range[2], 10)) {
+      return j;
     }
   }
   return -1;
@@ -1416,5 +1428,4 @@ function findLayerByName(doc, name) {
 function findAllLayersByName(doc, name) {
   return findLayers(doc, true, { name: name });
 }
-
 

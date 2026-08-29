@@ -38,9 +38,10 @@ Hỏi lấy template ở đâu:
 
 ### Vòng 3 — 3 câu còn lại
 
-1. **Length rules** — mỗi độ dài tên dùng template nào. Mặc định `PTS/` đặt tên
-   `..._3.psd` … `..._11.psd` = độ dài 3…11, cứ map thẳng số trong tên file sang
-   `min`/`max`. Hỏi người dùng xác nhận map này có đúng không.
+1. **Length rules** — mỗi độ dài tên dùng template nào. Tên kết thúc bằng một số,
+   như `..._3.psd`, tạo rule đúng một độ dài; tên có khoảng như `5-6.psd` tạo rule
+   `min: 5, max: 6`, nên tên dài 5 hoặc 6 ký tự đều dùng template đó. Hỏi người dùng
+   xác nhận map này có đúng không.
 2. **Tên file output** — `outputFormula`. Token: `[name]`, `[stt]`, `[content]`.
    Mặc định `[[name]][name]-xxx-[stt]`. Nhắc: công thức không có token nào thì
    mọi ảnh trùng tên và ghi đè nhau.
@@ -96,7 +97,7 @@ Log ở `tri-run.log`, trạng thái cuối (`OK`/`ERROR`) ở `tri-run.done`.
 | `outputFolder` | không | `Result/` | Tự tạo nếu chưa có. Dùng được `[NAS]/...` |
 | `outputFormula` | không | `[[name]][name]-xxx-[stt]` | `[name]`, `[stt]`, `[content]` |
 | `limit` | không | `0` | `0` = chạy hết. `> 0` = chỉ chạy N dòng đầu — dùng để smoke test |
-| `rules` | **có** | — | `[{ "min": 3, "max": 3, "template": "x.psd" }]`. `max: null` = không giới hạn trên, phải nằm cuối |
+| `rules` | **có** | — | `[{ "min": 3, "max": 3, "template": "x.psd" }]`; tên `5-6.psd` tự tạo `min: 5, max: 6`. `max: null` = không giới hạn trên, phải nằm cuối |
 
 `rules` không được chồng khoảng, script sẽ báo lỗi và dừng.
 Tên nào không khớp rule nào thì bị bỏ qua (đếm trong log).
