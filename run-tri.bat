@@ -89,6 +89,10 @@ REM Don dep dau vet lan chay truoc
 if exist "%DONE%" del /q "%DONE%"
 > "%POINTER%" echo %CONFIG%
 
+REM Dong Photoshop cu (neu con mo) de -r chay script tren instance moi
+taskkill /IM "Photoshop.exe" /F >nul 2>&1
+ping -n 4 127.0.0.1 >nul
+
 start "" "%PS_EXE%" -r "%JSX%"
 
 REM Poll file bao hieu - Photoshop khong thoat sau khi script xong
