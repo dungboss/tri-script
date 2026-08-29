@@ -151,6 +151,9 @@ dùng vào *System Settings → Privacy & Security → Automation*.
 > ghi config trỏ local, chạy, rồi upload kết quả lên NAS — đừng để Photoshop đọc/ghi trực
 > tiếp qua WebDAV (rất chậm).
 
+Fast-path thực hiện workflow này trên cả macOS và Windows; Windows chỉ khác ở cách gọi
+Photoshop bằng `run-tri.bat`.
+
 Credentials trong `.env` (copy từ `.env.example`, **không commit**).
 
 ```bash
