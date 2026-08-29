@@ -136,6 +136,7 @@ if /i "%STATUS%"=="OK" (
 )
 
 :retry_or_finish
+call :cleanup_temp
 if "%FINAL_EXIT%"=="0" exit /b 0
 if !ATTEMPT! lss !MAX_ATTEMPTS! (
   echo Photoshop loi/timeout - se dong va tu chay lai sau 5 giay (lan !ATTEMPT!/!MAX_ATTEMPTS!). 1>&2
@@ -147,3 +148,15 @@ if !ATTEMPT! lss !MAX_ATTEMPTS! (
 if exist "%POINTER%" del /q "%POINTER%"
 if "%FINAL_EXIT%"=="2" exit /b 2
 exit /b 3
+
+:cleanup_temp
+REM Xoa file tam Photoshop trong output, giu nguyen anh ket qua va log.
+set "CLEANUP_CONFIG=%CONFIG%"
+powershell -NoProfile -ExecutionPolicy Bypass -Command ^
+  "$cfg = Get-Content -Raw -LiteralPath $env:CLEANUP_CONFIG | ConvertFrom-Json;" ^
+  "$out = [string]$cfg.outputFolder;" ^
+  "if ($out -and -not [IO.Path]::IsPathRooted($out)) { $out = Join-Path $env:SCRIPT_DIR $out };" ^
+  "if (Test-Path -LiteralPath $out -PathType Container) {" ^
+  "  foreach ($f in (Get-ChildItem -LiteralPath $out -File -Force)) {" ^
+  "    if ($f.Name.StartsWith('._') -or $f.Name -like '*.sb-*') { Remove-Item -LiteralPath $f.FullName -Force -ErrorAction SilentlyContinue } } }" >nul 2>&1
+exit /b 0
