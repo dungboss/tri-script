@@ -135,6 +135,10 @@ dùng vào *System Settings → Privacy & Security → Automation*.
   Cài chỗ khác → đặt biến `TRI_PS_EXE`.
 - Photoshop **không tự thoát** sau khi script xong, nên batch chờ bằng cách poll
   `tri-run.done`. Mặc định 60 phút; đổi bằng `TRI_TIMEOUT_SEC`.
+- Nếu Photoshop báo lỗi, timeout hoặc không ghi `OK` vào `tri-run.done`, wrapper tự
+  đóng Photoshop và thử lại tối đa 3 lần tổng cộng. Đổi số lần thử bằng
+  `TRI_MAX_RETRIES` (mặc định `2` lần retry). Vì JSX bỏ qua ảnh đã tồn tại, lần thử
+  lại sẽ tiếp tục phần còn thiếu, không xuất lại từ đầu.
 - `Photoshop.exe -r` không truyền được tham số → batch ghi đường dẫn config vào
   `tri-config-path.txt`; script đọc rồi tự xoá. Đừng commit hay sửa file tạm này.
 - Photoshop đang mở document chưa lưu → hộp thoại lưu file có thể chặn script (exit 2).

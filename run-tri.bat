@@ -85,6 +85,16 @@ if not defined PS_EXE exit /b 1
 echo Photoshop: %PS_EXE%
 echo Config:    %CONFIG%
 
+REM Tu dong thu lai loi Photoshop/timeout. TRI_MAX_RETRIES=2 = tong 3 lan thu.
+if "%TRI_MAX_RETRIES%"=="" set "TRI_MAX_RETRIES=2"
+set /a MAX_ATTEMPTS=TRI_MAX_RETRIES+1
+set /a ATTEMPT=0
+set "FINAL_EXIT=3"
+
+:retry
+set /a ATTEMPT+=1
+echo --- Photoshop attempt !ATTEMPT!/!MAX_ATTEMPTS! ---
+
 REM Don dep dau vet lan chay truoc
 if exist "%DONE%" del /q "%DONE%"
 > "%POINTER%" echo %CONFIG%
@@ -98,8 +108,8 @@ if exist "%DONE%" goto finished
 if !WAITED! geq %TRI_TIMEOUT_SEC% (
   echo Qua thoi gian cho %TRI_TIMEOUT_SEC% giay ma script chua bao xong. 1>&2
   echo Kiem tra Photoshop co dang hien hop thoai nao khong. 1>&2
-  if exist "%LOG%" ( echo --- tri-run.log --- & type "%LOG%" )
-  exit /b 2
+  set "FINAL_EXIT=2"
+  goto retry_or_finish
 )
 REM timeout /t 2 khong chay duoc khi stdin bi redirect nen dung ping lam dong ho
 ping -n 3 127.0.0.1 >nul
@@ -107,6 +117,7 @@ set /a WAITED+=2
 goto wait
 
 :finished
+set "STATUS="
 set /p STATUS=<"%DONE%"
 if exist "%POINTER%" del /q "%POINTER%"
 
@@ -114,8 +125,21 @@ echo --- tri-run.log ---
 if exist "%LOG%" type "%LOG%"
 
 if /i "%STATUS%"=="OK" (
-  exit /b 0
+  set "FINAL_EXIT=0"
 ) else (
   echo Script ket thuc voi loi - xem log o tren. 1>&2
-  exit /b 3
+  set "FINAL_EXIT=3"
 )
+
+:retry_or_finish
+if "%FINAL_EXIT%"=="0" exit /b 0
+if !ATTEMPT! lss !MAX_ATTEMPTS! (
+  echo Photoshop loi/timeout - se dong va tu chay lai sau 5 giay (lan !ATTEMPT!/!MAX_ATTEMPTS!). 1>&2
+  taskkill /IM Photoshop.exe /F >nul 2>&1
+  ping -n 6 127.0.0.1 >nul
+  goto retry
+)
+
+if exist "%POINTER%" del /q "%POINTER%"
+if "%FINAL_EXIT%"=="2" exit /b 2
+exit /b 3
