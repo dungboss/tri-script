@@ -83,7 +83,7 @@ while :; do
   set +e
   ERR="$(osascript \
     -e "with timeout of ${TRI_OSA_TIMEOUT:-21600} seconds" \
-    -e "tell application \"$PS_APP\" to activate" \
+    -e "tell application \"$PS_APP\" to launch" \
     -e "tell application \"$PS_APP\" to do javascript (file (POSIX file \"$JSX\" as text)) with arguments {\"$CONFIG\"}" \
     -e "end timeout" \
     2>&1 >/dev/null)"
